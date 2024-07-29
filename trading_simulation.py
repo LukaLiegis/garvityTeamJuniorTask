@@ -70,4 +70,34 @@ class DoubleDogeSim:
                         self.trade("binance", "coinbase")
 
                 # Rebalance if necessary
-                self.rebalance()     
+                self.rebalance()
+
+        def trade(self, buy_exchange, sell_exchange):
+            trade_amount = min(
+                self.trade_size,
+                self.balances["USD"],
+                self.balances["USDT"]
+            )
+            if trade_amount > 0:
+                coins_bought = trade_amount / self.current_price
+                coins_sold = coins_bought * (1 - self.profit_margin)
+
+                # Apply fees
+                coins_bought *= (1 - getattr(self, f"{buy_exchange}_fee"))
+                coins_sold *= (1 - getattr(self, f"{sell_exchange}_fee"))
+
+                profit = (coins_sold * self.current_price) - trade_amount
+
+                self.balances[f"DOUBLEDOGE_{buy_exchange}"] += coins_bought
+                self.balances[f"DOUBLEDOGE_{sell_exchange}"] -= coins_sold
+
+                if buy_exchange == "coinbase":
+                    self.balances["USD"] -= trade_amount
+                    self.balances["USDT"] += coins_sold * self.current_price
+                else:
+                    self.balances["USDT"] -= trade_amount
+                    self.balances["USD"] += coins_sold * self.current_price
+
+                self.daily_volume += trade_amount
+                self.daily_trades += 1
+                self.daily_profit += profit

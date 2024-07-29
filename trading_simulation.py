@@ -1,6 +1,7 @@
 from decimal import Decimal, getcontext
 import numpy as np
 import random
+from random import uniform
 
 getcontext().prec = 8
 
@@ -41,3 +42,19 @@ class DoubleDogeSim:
             "USD": self.assets_under_management / 2,
             "USDT": self.assets_under_management / 2
         }
+
+        def simulate_price(self):
+            for day in range(self.days):
+                daily_change = Decimal(uniform(-0.25, 0.60))
+                for hour in range(self.hours_per_day):
+                    hourly_change = Decimal(uniform(-0.05, 0.05))
+                    self.current_price *= (1 + hourly_change)
+                self.current_price *= (1 + daily_change)
+                self.current_price = max(min(
+                    self.current_price,
+                    self.initial_price * (1 + self.max_daily_increase)),
+                    self.initial_price * (1 - self.max_daily_decrease)
+                )
+                self.price_history.append(self.current_price)
+
+        def simulate_trading(self):

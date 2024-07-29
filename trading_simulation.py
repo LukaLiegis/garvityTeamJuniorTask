@@ -58,3 +58,16 @@ class DoubleDogeSim:
                 self.price_history.append(self.current_price)
 
         def simulate_trading(self):
+            for day in range(self.days):
+                self.daily_volume = Decimal("0")
+                self.daily_trades = 0
+                self.daily_profit = Decimal("0")
+
+                for hour in range(self.hours_per_day):
+                    if random.random() < self.coinbase_buy_probability:
+                        self.trade("coinbase", "binance")
+                    else:
+                        self.trade("binance", "coinbase")
+
+                # Rebalance if necessary
+                self.rebalance()     

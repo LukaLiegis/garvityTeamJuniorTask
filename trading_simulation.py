@@ -101,3 +101,23 @@ class DoubleDogeSim:
             self.daily_volume += trade_amount
             self.daily_trades += 1
             self.daily_profit += profit
+
+# Run the simulation
+sim = DoubleDogeSim()
+sim.run_simulation()
+
+# Print results
+print(f"Average daily volume: {sim.daily_volume / sim.days}")
+print(f"Average daily trades: {sim.daily_trades / sim.days}")
+print(f"Average daily profit: {sim.daily_profit / sim.days}")
+print(f"Final balances: {sim.balances}")
+
+# Optional: Plot the price history
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(12, 6))
+plt.plot(sim.price_history)
+plt.title('DOUBLEDOGE Price History')
+plt.xlabel('Hours')
+plt.ylabel('Price (USD)')
+plt.show()

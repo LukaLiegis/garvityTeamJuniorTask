@@ -1,0 +1,78 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+from price_simulation import simulate_price
+from trading_simulation import simulate_trading
+from calculate_volume import calculate_daily_volume
+from optimal_balance import calculate_optimal_balances
+
+DAYS = 100
+HOURS_PER_DAY = 24
+INITIAL_PRICE = 5
+ASSETS_UNDER_MANAGEMENT = 10_000_000
+SCANDAL_INTERVAL = 5
+
+
+# Main simulation
+prices = simulate_price(DAYS, INITIAL_PRICE)
+total_profit_without_loan, trade_count_without_loan, _ = simulate_trading(prices)
+total_profit_with_loan, trade_count_with_loan, loan_cost = simulate_trading(prices, with_loan=True)
+
+# Calculate and print results
+daily_volume_binance, daily_volume_coinbase = calculate_daily_volume()
+optimal_balances = calculate_optimal_balances(ASSETS_UNDER_MANAGEMENT)
+
+print(f"1. Expected daily trading volume: ${daily_volume_binance + daily_volume_coinbase:,.2f}")
+print(f"2. Optimal balances:")
+print(f"   DOUBLEDOGE_coinbase: ${optimal_balances[0]:,.2f}")
+print(f"   DOUBLEDOGE_binance: ${optimal_balances[1]:,.2f}")
+print(f"   USD: ${optimal_balances[2]:,.2f}")
+print(f"   USDT: ${optimal_balances[3]:,.2f}")
+print(f"3. Max balance for each asset/exchange: 40% of total assets")
+print(f"4. Transfer between exchanges when balance exceeds 45% of total assets on one exchange")
+print(f"5. Expected trades per day: {trade_count_without_loan // DAYS}")
+print(f"6. Loan analysis:")
+print(f"   Profit without loan: ${total_profit_without_loan:,.2f}")
+print(f"   Profit with loan: ${total_profit_with_loan:,.2f}")
+print(f"   Loan cost: ${loan_cost:,.2f}")
+if total_profit_with_loan > total_profit_without_loan:
+    print(f"   Recommendation: Take the loan. Additional profit: ${total_profit_with_loan - total_profit_without_loan:,.2f}")
+else:
+    print(f"   Recommendation: Do not take the loan. Potential loss: ${total_profit_without_loan - total_profit_with_loan:,.2f}")
+print(f"7. Expected total profit per day (without loan): ${total_profit_without_loan / DAYS:,.2f}")
+print("8. Risk measures: Implement position limits, stop-loss orders, and diversification")
+print("9. Key metrics: Daily profit, trade count, asset distribution, price volatility, loan utilization")
+print("10. Stop loss: 10% below entry, Take profit: 20% above entry")
+print("11. Improvements: Implement machine learning for price prediction, optimize trade timing, dynamic loan utilization")
+
+# Plot price simulation and P/L curves
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10))
+
+# Price simulation plot
+ax1.plot(prices)
+ax1.set_title('DOUBLEDOGE Price Simulation')
+ax1.set_xlabel('Hours')
+ax1.set_ylabel('Price ($)')
+
+# Highlight scandal days
+for i in range(SCANDAL_INTERVAL, DAYS + 1, SCANDAL_INTERVAL):
+    ax1.axvline(x=i * HOURS_PER_DAY, color='r', linestyle='--', alpha=0.5)
+
+# P/L curve plot
+hours = np.arange(DAYS * HOURS_PER_DAY)
+cumulative_profit_without_loan = np.cumsum([total_profit_without_loan / (DAYS * HOURS_PER_DAY)] * (DAYS * HOURS_PER_DAY))
+cumulative_profit_with_loan = np.cumsum([total_profit_with_loan / (DAYS * HOURS_PER_DAY)] * (DAYS * HOURS_PER_DAY))
+
+ax2.plot(hours, cumulative_profit_without_loan, label='Without Loan')
+ax2.plot(hours, cumulative_profit_with_loan, label='With Loan')
+ax2.set_title('Cumulative Profit/Loss')
+ax2.set_xlabel('Hours')
+ax2.set_ylabel('Profit ($)')
+ax2.legend()
+
+# Highlight scandal days
+for i in range(SCANDAL_INTERVAL, DAYS + 1, SCANDAL_INTERVAL):
+    ax2.axvline(x=i * HOURS_PER_DAY, color='r', linestyle='--', alpha=0.5)
+
+plt.tight_layout()
+plt.show()

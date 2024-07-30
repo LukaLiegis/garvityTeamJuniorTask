@@ -4,6 +4,7 @@ HOURS_PER_DAY = 24
 MAX_DAILY_INCREASE = 0.60
 MAX_DAILY_DECREASE = 0.25
 HOURLY_FLUCTUATION = 0.05
+SCANDAL_INTERVAL = 5
 
 def simulate_price(days: int, initial_price: float) -> np.ndarray:
     prices = np.zeros(days * HOURS_PER_DAY)
@@ -11,6 +12,11 @@ def simulate_price(days: int, initial_price: float) -> np.ndarray:
     
     for day in range(days):
         daily_change = np.random.uniform(-MAX_DAILY_DECREASE, MAX_DAILY_INCREASE)
+        
+        # Simulate scandal effect every 5th day
+        if (day + 1) % SCANDAL_INTERVAL == 0:
+            daily_change = np.random.uniform(-MAX_DAILY_DECREASE, -MAX_DAILY_DECREASE/2)
+        
         for hour in range(HOURS_PER_DAY):
             idx = day * HOURS_PER_DAY + hour
             if idx > 0:

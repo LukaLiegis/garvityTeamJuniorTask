@@ -135,6 +135,10 @@ class DoubleDogeSim:
                 self.balances['DOUBLEDOGE_coinbase'] += abs(doubledoge_difference)
                 self.balances['DOUBLEDOGE_binance'] -= abs(doubledoge_difference)
 
+    def run_simulation(self):
+        self.simulate_price()
+        self.simulate_trading()
+
 # Run the simulation
 sim = DoubleDogeSim()
 sim.run_simulation()

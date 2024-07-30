@@ -102,6 +102,39 @@ class DoubleDogeSim:
             self.daily_trades += 1
             self.daily_profit += profit
 
+    def rebalance(self):
+        total_fiat = self.balances["USD"] + self.balances["USDT"]
+        total_doubledoge = (self.balances["DOUBLEDOGE_coinbase"] + self.balances["DOUBLEDOGE_binance"]) * self.current_price
+        total_value = total_fiat + total_doubledoge
+
+        # Target 
+        target_fiat = total_value * Decimal("0.5")
+        target_usd = target_fiat / 2
+        target_usdt = target_fiat / 2
+
+        # Rebalance USD and USDT
+        usd_difference = self.balances["USD"] - target_usd
+        if abs(usd_difference) > total_value * Decimal("0.05"): # 5% threshold
+            if usd_difference > 0:
+                self.balances["USD"] -= usd_difference
+                self.balances["USDT"] += usd_difference
+            else:
+                self.balances["USD"] += abs(usd_difference)
+                self.balances["USDT"] -= abs(usd_difference)
+
+        # Rebalance between exchanges
+        total_doubledoge_coins = self.balances['DOUBLEDOGE_coinbase'] + self.balances['DOUBLEDOGE_binance']
+        target_doubledoge_coinbase = total_doubledoge_coins * Decimal(self.coinbase_dominance) / (Decimal(self.coinbase_dominance) + Decimal(self.binance_dominance))
+        doubledoge_difference = self.balances['DOUBLEDOGE_coinbase'] - target_doubledoge_coinbase
+
+        if abs(doubledoge_difference) > total_doubledoge_coins * Decimal('0.1'):  # 10% threshold
+            if doubledoge_difference > 0:
+                self.balances['DOUBLEDOGE_coinbase'] -= doubledoge_difference
+                self.balances['DOUBLEDOGE_binance'] += doubledoge_difference
+            else:
+                self.balances['DOUBLEDOGE_coinbase'] += abs(doubledoge_difference)
+                self.balances['DOUBLEDOGE_binance'] -= abs(doubledoge_difference)
+
 # Run the simulation
 sim = DoubleDogeSim()
 sim.run_simulation()

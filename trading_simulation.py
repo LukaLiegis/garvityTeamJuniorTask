@@ -159,8 +159,8 @@ sim = DoubleDogeSim()
 sim.run_simulation()
 
 # Print results
-print(f"Average daily volume: {sim.daily_volume / sim.days}")
-print(f"Average daily trades: {sim.daily_trades / sim.days}")
+print(f"Average daily volume: {sum(sim.volume_history) / sim.days}")
+print(f"Average daily trades: {sum(sim.trades_history) / sim.days}")
 print(f"Average daily profit: {sum(sim.profit_history) / sim.days}")
 print(f"Final balances: {sim.balances}")
 

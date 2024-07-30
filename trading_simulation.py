@@ -43,61 +43,61 @@ class DoubleDogeSim:
             "USDT": self.assets_under_management / 2
         }
 
-        def simulate_price(self):
-            for day in range(self.days):
-                daily_change = Decimal(uniform(-0.25, 0.60))
-                for hour in range(self.hours_per_day):
-                    hourly_change = Decimal(uniform(-0.05, 0.05))
-                    self.current_price *= (1 + hourly_change)
-                self.current_price *= (1 + daily_change)
-                self.current_price = max(min(
-                    self.current_price,
-                    self.initial_price * (1 + self.max_daily_increase)),
-                    self.initial_price * (1 - self.max_daily_decrease)
-                )
-                self.price_history.append(self.current_price)
-
-        def simulate_trading(self):
-            for day in range(self.days):
-                self.daily_volume = Decimal("0")
-                self.daily_trades = 0
-                self.daily_profit = Decimal("0")
-
-                for hour in range(self.hours_per_day):
-                    if random.random() < self.coinbase_buy_probability:
-                        self.trade("coinbase", "binance")
-                    else:
-                        self.trade("binance", "coinbase")
-
-                # Rebalance if necessary
-                self.rebalance()
-
-        def trade(self, buy_exchange, sell_exchange):
-            trade_amount = min(
-                self.trade_size,
-                self.balances["USD"],
-                self.balances["USDT"]
+    def simulate_price(self):
+        for day in range(self.days):
+            daily_change = Decimal(uniform(-0.25, 0.60))
+            for hour in range(self.hours_per_day):
+                hourly_change = Decimal(uniform(-0.05, 0.05))
+                self.current_price *= (1 + hourly_change)
+            self.current_price *= (1 + daily_change)
+            self.current_price = max(min(
+                self.current_price,
+                self.initial_price * (1 + self.max_daily_increase)),
+                self.initial_price * (1 - self.max_daily_decrease)
             )
-            if trade_amount > 0:
-                coins_bought = trade_amount / self.current_price
-                coins_sold = coins_bought * (1 - self.profit_margin)
+            self.price_history.append(self.current_price)
 
-                # Apply fees
-                coins_bought *= (1 - getattr(self, f"{buy_exchange}_fee"))
-                coins_sold *= (1 - getattr(self, f"{sell_exchange}_fee"))
+    def simulate_trading(self):
+        for day in range(self.days):
+            self.daily_volume = Decimal("0")
+            self.daily_trades = 0
+            self.daily_profit = Decimal("0")
 
-                profit = (coins_sold * self.current_price) - trade_amount
+            for hour in range(self.hours_per_day):
+                 if random.random() < self.coinbase_buy_probability:
+                    self.trade("coinbase", "binance")
+                 else:
+                    self.trade("binance", "coinbase")
 
-                self.balances[f"DOUBLEDOGE_{buy_exchange}"] += coins_bought
-                self.balances[f"DOUBLEDOGE_{sell_exchange}"] -= coins_sold
+            # Rebalance if necessary
+            self.rebalance()
 
-                if buy_exchange == "coinbase":
-                    self.balances["USD"] -= trade_amount
-                    self.balances["USDT"] += coins_sold * self.current_price
-                else:
-                    self.balances["USDT"] -= trade_amount
-                    self.balances["USD"] += coins_sold * self.current_price
+    def trade(self, buy_exchange, sell_exchange):
+        trade_amount = min(
+            self.trade_size,
+            self.balances["USD"],
+            self.balances["USDT"]
+        )
+        if trade_amount > 0:
+            coins_bought = trade_amount / self.current_price
+            coins_sold = coins_bought * (1 - self.profit_margin)
 
-                self.daily_volume += trade_amount
-                self.daily_trades += 1
-                self.daily_profit += profit
+            # Apply fees
+            coins_bought *= (1 - getattr(self, f"{buy_exchange}_fee"))
+            coins_sold *= (1 - getattr(self, f"{sell_exchange}_fee"))
+
+            profit = (coins_sold * self.current_price) - trade_amount
+
+            self.balances[f"DOUBLEDOGE_{buy_exchange}"] += coins_bought
+            self.balances[f"DOUBLEDOGE_{sell_exchange}"] -= coins_sold
+
+            if buy_exchange == "coinbase":
+                self.balances["USD"] -= trade_amount
+                self.balances["USDT"] += coins_sold * self.current_price
+            else:
+                self.balances["USDT"] -= trade_amount
+                self.balances["USD"] += coins_sold * self.current_price
+
+            self.daily_volume += trade_amount
+            self.daily_trades += 1
+            self.daily_profit += profit

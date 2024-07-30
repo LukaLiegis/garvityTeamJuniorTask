@@ -106,17 +106,14 @@ class DoubleDogeSim:
         return {'volume': Decimal('0'), 'trades': 0, 'profit': Decimal('0')}
     
     def rebalance(self):
-        total_fiat = self.balances["USD"] + self.balances["USDT"]
-        total_doubledoge = (self.balances["DOUBLEDOGE_coinbase"] + self.balances["DOUBLEDOGE_binance"]) * self.current_price
+        total_fiat = self.balances['USD'] + self.balances['USDT']
+        total_doubledoge = (self.balances['DOUBLEDOGE_coinbase'] + self.balances['DOUBLEDOGE_binance']) * self.current_price
         total_value = total_fiat + total_doubledoge
 
-        # Target 
-        target_fiat = total_value * Decimal("0.5")
-        target_usd = target_fiat / 2
-        target_usdt = target_fiat / 2
+        rebalance_cost = Decimal('0')
 
-         # Rebalance USD and USDT
-        usd_difference = self.balances['USD'] - target_usd
+        # Rebalance USD and USDT
+        usd_difference = self.balances['USD'] - total_fiat / 2
         if abs(usd_difference) > total_value * Decimal('0.05'):  # 5% threshold
             transfer_amount = abs(usd_difference)
             transfer_fee = self.binance_to_coinbase_fee_usd if usd_difference > 0 else self.coinbase_to_binance_fee_usd
@@ -129,7 +126,7 @@ class DoubleDogeSim:
                 else:
                     self.balances['USD'] += actual_transfer
                     self.balances['USDT'] -= transfer_amount
-                self.daily_profit -= transfer_fee
+                rebalance_cost += transfer_fee
 
         # Rebalance DOUBLEDOGE between exchanges
         total_doubledoge_coins = self.balances['DOUBLEDOGE_coinbase'] + self.balances['DOUBLEDOGE_binance']
@@ -149,7 +146,9 @@ class DoubleDogeSim:
                 else:
                     self.balances['DOUBLEDOGE_coinbase'] += actual_transfer
                     self.balances['DOUBLEDOGE_binance'] -= transfer_amount
-                self.daily_profit -= transfer_fee
+                rebalance_cost += transfer_fee
+
+        return rebalance_cost
 
     def run_simulation(self):
         self.simulate_price()

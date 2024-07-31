@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from price_simulation import simulate_price
-from trading_simulation import simulate_trading
-from calculate_volume import calculate_daily_volume
-from optimal_balance import calculate_optimal_balances
+from src.price_simulation import simulate_price
+from src.trading_simulation import simulate_trading
+from src.calculate_volume import calculate_daily_volume
+from src.optimal_balance import calculate_optimal_balances
 
 DAYS = 100
 HOURS_PER_DAY = 24

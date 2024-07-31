@@ -14,15 +14,16 @@ TRANSFER_THRESHOLD = BALANCE_THRESHOLD - 0.05  # Set transfer threshold 5% below
 
 # Main simulation
 prices = simulate_price(src.constants.DAYS, src.constants.INITIAL_PRICE)
-hourly_profits_without_loan, trade_count_without_loan, _,  binance_volumes, coinbase_volumes = simulate_trading(prices)
+
+# Calculate optimal balances using the simulated prices
+optimal_balances = calculate_optimal_balances(src.constants.ASSETS_UNDER_MANAGEMENT, prices)
+
+hourly_profits_without_loan, trade_count_without_loan, _, binance_volumes, coinbase_volumes = simulate_trading(prices)
 hourly_profits_with_loan, trade_count_with_loan, loan_cost, _, _ = simulate_trading(prices, with_loan=True)
 
 # Calculate metrics
 metrics_without_loan = calculate_trade_metrics(hourly_profits_without_loan, trade_count_without_loan)
 metrics_with_loan = calculate_trade_metrics(hourly_profits_with_loan, trade_count_with_loan)
-
-# Calculate optimal balances
-optimal_balances = calculate_optimal_balances(src.constants.ASSETS_UNDER_MANAGEMENT)
 
 # Calculate system's daily trading volume
 system_daily_binance_volume = sum(binance_volumes) / src.constants.DAYS

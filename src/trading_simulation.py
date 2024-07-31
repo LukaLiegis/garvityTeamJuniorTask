@@ -1,6 +1,5 @@
-from typing import Tuple, List
 import numpy as np
-
+from typing import Tuple, List
 from src.balance_threshold import calculate_balance_threshold
 import src.constants
 
@@ -17,8 +16,13 @@ def simulate_trading(prices: np.ndarray, with_loan: bool = False) -> Tuple[List[
     binance_volumes = []
     coinbase_volumes = []
     
-    for day, daily_prices in enumerate(np.array_split(prices, src.constants.DAYS)):
-        for hour, price in enumerate(daily_prices):
+    # Time constraints
+    transfer_cooldown_binance_to_coinbase = 0
+    transfer_cooldown_coinbase_to_binance = 0
+    
+    for day in range(src.constants.DAYS):
+        for hour in range(src.constants.HOURS_PER_DAY):
+            current_price = prices[day * src.constants.HOURS_PER_DAY + hour]
             hourly_profit = 0
             binance_volume = 0
             coinbase_volume = 0
@@ -26,11 +30,12 @@ def simulate_trading(prices: np.ndarray, with_loan: bool = False) -> Tuple[List[
             # Increased profit margin for 1 hour every day
             profit_margin = src.constants.INCREASED_PROFIT_MARGIN if hour == 0 else src.constants.NORMAL_PROFIT_MARGIN
             
+            # Use fixed probability for trade direction
             if np.random.random() < src.constants.COINBASE_TO_BINANCE_PROBABILITY:
                 # Buy on Coinbase, sell on Binance
                 if coinbase_balance >= src.constants.TRADE_SIZE:
-                    buy_price = price * (1 - profit_margin/2)
-                    sell_price = price * (1 + profit_margin/2)
+                    buy_price = current_price * (1 - profit_margin/2)
+                    sell_price = current_price * (1 + profit_margin/2)
                     trade_size = min(src.constants.TRADE_SIZE, coinbase_balance)
                     profit = (sell_price - buy_price) * trade_size
                     profit -= trade_size * (src.constants.COINBASE_FEE + src.constants.BINANCE_FEE)
@@ -44,8 +49,8 @@ def simulate_trading(prices: np.ndarray, with_loan: bool = False) -> Tuple[List[
             else:
                 # Buy on Binance, sell on Coinbase
                 if binance_balance >= src.constants.TRADE_SIZE:
-                    buy_price = price * (1 - profit_margin/2)
-                    sell_price = price * (1 + profit_margin/2)
+                    buy_price = current_price * (1 - profit_margin/2)
+                    sell_price = current_price * (1 + profit_margin/2)
                     trade_size = min(src.constants.TRADE_SIZE, binance_balance)
                     profit = (sell_price - buy_price) * trade_size
                     profit -= trade_size * (src.constants.COINBASE_FEE + src.constants.BINANCE_FEE)
@@ -54,25 +59,31 @@ def simulate_trading(prices: np.ndarray, with_loan: bool = False) -> Tuple[List[
                     trade_count += 1
                     binance_balance -= trade_size
                     coinbase_balance += trade_size + profit
-                    coinbase_volume += trade_size
                     binance_volume += trade_size
+                    coinbase_volume += trade_size
             
-            # Balance transfer logic (unchanged)
+            # Balance transfer logic with time constraints
             total_balance = binance_balance + coinbase_balance
-            if binance_balance > total_balance * BALANCE_THRESHOLD:
+            if binance_balance > total_balance * BALANCE_THRESHOLD and transfer_cooldown_binance_to_coinbase == 0:
                 transfer_amount = binance_balance - (total_balance * TRANSFER_THRESHOLD)
                 transfer_fee = src.constants.BINANCE_TO_COINBASE_TRANSFER_FEE + src.constants.USD_USDT_TRANSFER_FEE
                 if transfer_amount > transfer_fee:
                     binance_balance -= transfer_amount
                     coinbase_balance += transfer_amount - transfer_fee
                     hourly_profit -= transfer_fee
-            elif coinbase_balance > total_balance * BALANCE_THRESHOLD:
+                    transfer_cooldown_binance_to_coinbase = 1  # 15 minutes cooldown (1/4 of an hour)
+            elif coinbase_balance > total_balance * BALANCE_THRESHOLD and transfer_cooldown_coinbase_to_binance == 0:
                 transfer_amount = coinbase_balance - (total_balance * TRANSFER_THRESHOLD)
                 transfer_fee = src.constants.COINBASE_TO_BINANCE_TRANSFER_FEE + src.constants.USD_USDT_TRANSFER_FEE
                 if transfer_amount > transfer_fee:
                     coinbase_balance -= transfer_amount
                     binance_balance += transfer_amount - transfer_fee
                     hourly_profit -= transfer_fee
+                    transfer_cooldown_coinbase_to_binance = 1  # 15 minutes cooldown (1/4 of an hour)
+            
+            # Update transfer cooldowns
+            transfer_cooldown_binance_to_coinbase = max(0, transfer_cooldown_binance_to_coinbase - 1)
+            transfer_cooldown_coinbase_to_binance = max(0, transfer_cooldown_coinbase_to_binance - 1)
             
             if with_loan:
                 hourly_loan_cost = (src.constants.LOAN_AMOUNT * src.constants.LOAN_INTEREST_RATE) / src.constants.HOURS_PER_DAY

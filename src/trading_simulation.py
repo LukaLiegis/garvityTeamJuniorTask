@@ -1,6 +1,8 @@
 from typing import Tuple, List
 import numpy as np
 
+from src.balance_threshold import calculate_balance_threshold
+
 DAYS = 100
 HOURS_PER_DAY = 24
 NORMAL_PROFIT_MARGIN = 0.016
@@ -15,6 +17,10 @@ BINANCE_TO_COINBASE_TRANSFER_FEE = 45
 COINBASE_TO_BINANCE_TRANSFER_FEE = 62
 USD_USDT_TRANSFER_FEE = 3.5  # Average of $3 and $4
 ASSETS_UNDER_MANAGEMENT = 10_000_000
+
+# Calculate the balance threshold
+BALANCE_THRESHOLD = calculate_balance_threshold()
+TRANSFER_THRESHOLD = BALANCE_THRESHOLD - 0.05  # Set transfer threshold 5% below max balance
 
 def simulate_trading(prices: np.ndarray, with_loan: bool = False) -> Tuple[List[float], int, float]:
     hourly_profits = []
@@ -61,15 +67,15 @@ def simulate_trading(prices: np.ndarray, with_loan: bool = False) -> Tuple[List[
             
             # Balance transfer logic
             total_balance = binance_balance + coinbase_balance
-            if binance_balance > total_balance * 0.55:
-                transfer_amount = binance_balance - (total_balance * 0.5)
+            if binance_balance > total_balance * BALANCE_THRESHOLD:
+                transfer_amount = binance_balance - (total_balance * TRANSFER_THRESHOLD)
                 transfer_fee = BINANCE_TO_COINBASE_TRANSFER_FEE + USD_USDT_TRANSFER_FEE
                 if transfer_amount > transfer_fee:
                     binance_balance -= transfer_amount
                     coinbase_balance += transfer_amount - transfer_fee
                     hourly_profit -= transfer_fee
-            elif coinbase_balance > total_balance * 0.55:
-                transfer_amount = coinbase_balance - (total_balance * 0.5)
+            elif coinbase_balance > total_balance * BALANCE_THRESHOLD:
+                transfer_amount = coinbase_balance - (total_balance * TRANSFER_THRESHOLD)
                 transfer_fee = COINBASE_TO_BINANCE_TRANSFER_FEE + USD_USDT_TRANSFER_FEE
                 if transfer_amount > transfer_fee:
                     coinbase_balance -= transfer_amount

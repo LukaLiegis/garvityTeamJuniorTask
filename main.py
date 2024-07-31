@@ -5,6 +5,7 @@ from src.price_simulation import simulate_price
 from src.trading_simulation import simulate_trading
 from src.calculate_volume import calculate_daily_volume
 from src.optimal_balance import calculate_optimal_balances
+from src.balance_threshold import calculate_balance_threshold
 
 DAYS = 100
 HOURS_PER_DAY = 24
@@ -12,6 +13,9 @@ INITIAL_PRICE = 5
 ASSETS_UNDER_MANAGEMENT = 10_000_000
 SCANDAL_INTERVAL = 5
 
+# Calculate the balance threshold
+BALANCE_THRESHOLD = calculate_balance_threshold()
+TRANSFER_THRESHOLD = BALANCE_THRESHOLD - 0.05  # Set transfer threshold 5% below max balance
 
 # Main simulation
 prices = simulate_price(DAYS, INITIAL_PRICE)
@@ -31,8 +35,8 @@ print(f"   DOUBLEDOGE_coinbase: ${optimal_balances[0]:,.2f}")
 print(f"   DOUBLEDOGE_binance: ${optimal_balances[1]:,.2f}")
 print(f"   USD: ${optimal_balances[2]:,.2f}")
 print(f"   USDT: ${optimal_balances[3]:,.2f}")
-print(f"3. Max balance for each asset/exchange: 55% of total assets")
-print(f"4. Transfer between exchanges when balance exceeds 55% of total assets on one exchange")
+print(f"3. Max balance for each asset/exchange: {BALANCE_THRESHOLD:.2%} of total assets")
+print(f"4. Transfer between exchanges when balance exceeds {BALANCE_THRESHOLD:.2%} of total assets on one exchange")
 print(f"5. Expected trades per day: {trade_count_without_loan // DAYS}")
 print(f"6. Loan analysis:")
 print(f"   Profit without loan: ${total_profit_without_loan:,.2f}")

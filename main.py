@@ -5,7 +5,6 @@ import src.constants
 from src.price_simulation import simulate_price
 from src.trading_simulation import simulate_trading
 from src.trade_metrics import calculate_trade_metrics
-from src.calculate_volume import calculate_daily_volume
 from src.optimal_balance import calculate_optimal_balances
 from src.balance_threshold import calculate_balance_threshold
 

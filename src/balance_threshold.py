@@ -1,11 +1,11 @@
 import src.constants
+from src.calculate_volume import calculate_daily_volume
 
-def calculate_balance_threshold():
+def calculate_balance_threshold() -> float:
     """
     Calculation to determine the optimal balance threshold.
     """
-    binance_volume = src.constants.BINANCE_VOLUME / src.constants.BINANCE_DOMINANCE
-    coinbase_volume = src.constants.COINBASE_VOLUME / src.constants.COINBASE_DOMINANCE
+    binance_volume, coinbase_volume = calculate_daily_volume()
     total_volume = binance_volume + coinbase_volume
     
     # Calculate the ratio of volumes

@@ -58,9 +58,7 @@ else:
     print(f"   Recommendation: Do not take the loan. Potential loss: ${metrics_without_loan[0] - metrics_with_loan[0]:,.2f}")
 print(f"7. Expected total profit per day (without loan): ${metrics_without_loan[0] / src.constants.DAYS:,.2f}")
 print("8. Risk measures: Implement position limits, stop-loss orders, and diversification")
-print("9. Key metrics: Daily profit, trade count, asset distribution, price volatility, loan utilization, Sharpe ratio")
 print("10. Stop loss: 10% below entry, Take profit: 20% above entry")
-print("11. Improvements: Implement machine learning for price prediction, optimize trade timing, dynamic loan utilization")
 
 # Plot price simulation and P/L curves
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10))

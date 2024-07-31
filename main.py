@@ -15,8 +15,11 @@ SCANDAL_INTERVAL = 5
 
 # Main simulation
 prices = simulate_price(DAYS, INITIAL_PRICE)
-total_profit_without_loan, trade_count_without_loan, _ = simulate_trading(prices)
-total_profit_with_loan, trade_count_with_loan, loan_cost = simulate_trading(prices, with_loan=True)
+hourly_profits_without_loan, trade_count_without_loan, _ = simulate_trading(prices)
+hourly_profits_with_loan, trade_count_with_loan, loan_cost = simulate_trading(prices, with_loan=True)
+
+total_profit_without_loan = sum(hourly_profits_without_loan)
+total_profit_with_loan = sum(hourly_profits_with_loan)
 
 # Calculate and print results
 daily_volume_binance, daily_volume_coinbase = calculate_daily_volume()
@@ -28,8 +31,8 @@ print(f"   DOUBLEDOGE_coinbase: ${optimal_balances[0]:,.2f}")
 print(f"   DOUBLEDOGE_binance: ${optimal_balances[1]:,.2f}")
 print(f"   USD: ${optimal_balances[2]:,.2f}")
 print(f"   USDT: ${optimal_balances[3]:,.2f}")
-print(f"3. Max balance for each asset/exchange: 40% of total assets")
-print(f"4. Transfer between exchanges when balance exceeds 45% of total assets on one exchange")
+print(f"3. Max balance for each asset/exchange: 55% of total assets")
+print(f"4. Transfer between exchanges when balance exceeds 55% of total assets on one exchange")
 print(f"5. Expected trades per day: {trade_count_without_loan // DAYS}")
 print(f"6. Loan analysis:")
 print(f"   Profit without loan: ${total_profit_without_loan:,.2f}")
@@ -60,8 +63,8 @@ for i in range(SCANDAL_INTERVAL, DAYS + 1, SCANDAL_INTERVAL):
 
 # P/L curve plot
 hours = np.arange(DAYS * HOURS_PER_DAY)
-cumulative_profit_without_loan = np.cumsum([total_profit_without_loan / (DAYS * HOURS_PER_DAY)] * (DAYS * HOURS_PER_DAY))
-cumulative_profit_with_loan = np.cumsum([total_profit_with_loan / (DAYS * HOURS_PER_DAY)] * (DAYS * HOURS_PER_DAY))
+cumulative_profit_without_loan = np.cumsum(hourly_profits_without_loan)
+cumulative_profit_with_loan = np.cumsum(hourly_profits_with_loan)
 
 ax2.plot(hours, cumulative_profit_without_loan, label='Without Loan')
 ax2.plot(hours, cumulative_profit_with_loan, label='With Loan')

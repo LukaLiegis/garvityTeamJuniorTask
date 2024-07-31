@@ -1,6 +1,8 @@
 from typing import Tuple
 
+import src.constants
+
 def calculate_daily_volume() -> Tuple[float, float]:
-    binance_volume = 100_000_000 * 0.026  # 2.6% dominance
-    coinbase_volume = 80_000_000 * 0.041  # 4.1% dominance
+    binance_volume = src.constants.BINANCE_VOLUME * src.constants.BINANCE_DOMINANCE
+    coinbase_volume = src.constants.COINBASE_VOLUME * src.constants.COINBASE_DOMINANCE
     return binance_volume, coinbase_volume

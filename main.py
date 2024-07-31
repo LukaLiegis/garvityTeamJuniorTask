@@ -15,23 +15,31 @@ TRANSFER_THRESHOLD = BALANCE_THRESHOLD - 0.05  # Set transfer threshold 5% below
 
 # Main simulation
 prices = simulate_price(src.constants.DAYS, src.constants.INITIAL_PRICE)
-hourly_profits_without_loan, trade_count_without_loan, _ = simulate_trading(prices)
-hourly_profits_with_loan, trade_count_with_loan, loan_cost = simulate_trading(prices, with_loan=True)
+hourly_profits_without_loan, trade_count_without_loan, _,  binance_volumes, coinbase_volumes = simulate_trading(prices)
+hourly_profits_with_loan, trade_count_with_loan, loan_cost, _, _ = simulate_trading(prices, with_loan=True)
 
 # Calculate metrics
 metrics_without_loan = calculate_trade_metrics(hourly_profits_without_loan, trade_count_without_loan)
 metrics_with_loan = calculate_trade_metrics(hourly_profits_with_loan, trade_count_with_loan)
 
+# Calculate optimal balances
+optimal_balances = calculate_optimal_balances(src.constants.ASSETS_UNDER_MANAGEMENT)
+
+# Calculate system's daily trading volume
+system_daily_binance_volume = sum(binance_volumes) / src.constants.DAYS
+system_daily_coinbase_volume = sum(coinbase_volumes) / src.constants.DAYS
+system_total_daily_volume = system_daily_binance_volume + system_daily_coinbase_volume
+
 # Print results
-print(f"1. Expected daily trading volume:")
-print(f"   Binance: ${src.constants.BINANCE_VOLUME:,.2f}")
-print(f"   Coinbase: ${src.constants.COINBASE_VOLUME:,.2f}")
-print(f"   Total: ${src.constants.BINANCE_VOLUME + src.constants.COINBASE_VOLUME:,.2f}")
+print(f"1. Expected daily trading volume (our system):")
+print(f"   Binance: ${system_daily_binance_volume:,.2f}")
+print(f"   Coinbase: ${system_daily_coinbase_volume:,.2f}")
+print(f"   Total: ${system_total_daily_volume:,.2f}")
 print(f"2. Optimal balances:")
-print(f"   DOUBLEDOGE_coinbase: ${src.constants.ASSETS_UNDER_MANAGEMENT * src.constants.COINBASE_VOLUME / (src.constants.BINANCE_VOLUME + src.constants.COINBASE_VOLUME):,.2f}")
-print(f"   DOUBLEDOGE_binance: ${src.constants.ASSETS_UNDER_MANAGEMENT * src.constants.BINANCE_VOLUME / (src.constants.BINANCE_VOLUME + src.constants.COINBASE_VOLUME):,.2f}")
-print(f"   USD: ${src.constants.ASSETS_UNDER_MANAGEMENT * 0.1:,.2f}")
-print(f"   USDT: ${src.constants.ASSETS_UNDER_MANAGEMENT * 0.1:,.2f}")
+print(f"   DOUBLEDOGE_coinbase: ${optimal_balances[0]:,.2f}")
+print(f"   DOUBLEDOGE_binance: ${optimal_balances[1]:,.2f}")
+print(f"   USD: ${optimal_balances[2]:,.2f}")
+print(f"   USDT: ${optimal_balances[3]:,.2f}")
 print(f"3. Max balance for each asset/exchange: {BALANCE_THRESHOLD:.2%} of total assets")
 print(f"4. Transfer between exchanges when balance exceeds {BALANCE_THRESHOLD:.2%} of total assets on one exchange")
 print(f"5. Expected trades per day: {trade_count_without_loan // src.constants.DAYS}")

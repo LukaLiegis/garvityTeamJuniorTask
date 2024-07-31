@@ -8,16 +8,20 @@ import src.constants
 BALANCE_THRESHOLD = calculate_balance_threshold()
 TRANSFER_THRESHOLD = BALANCE_THRESHOLD - 0.05  # Set transfer threshold 5% below max balance
 
-def simulate_trading(prices: np.ndarray, with_loan: bool = False) -> Tuple[List[float], int, float]:
+def simulate_trading(prices: np.ndarray, with_loan: bool = False) -> Tuple[List[float], int, float, List[float], List[float]]:
     hourly_profits = []
     trade_count = 0
     loan_cost = 0
     binance_balance = src.constants.ASSETS_UNDER_MANAGEMENT / 2
     coinbase_balance = src.constants.ASSETS_UNDER_MANAGEMENT / 2
+    binance_volumes = []
+    coinbase_volumes = []
     
     for day, daily_prices in enumerate(np.array_split(prices, src.constants.DAYS)):
         for hour, price in enumerate(daily_prices):
             hourly_profit = 0
+            binance_volume = 0
+            coinbase_volume = 0
             
             # Increased profit margin for 1 hour every day
             profit_margin = src.constants.INCREASED_PROFIT_MARGIN if hour == 0 else src.constants.NORMAL_PROFIT_MARGIN
@@ -35,6 +39,8 @@ def simulate_trading(prices: np.ndarray, with_loan: bool = False) -> Tuple[List[
                     trade_count += 1
                     coinbase_balance -= trade_size
                     binance_balance += trade_size + profit
+                    coinbase_volume += trade_size
+                    binance_volume += trade_size
             else:
                 # Buy on Binance, sell on Coinbase
                 if binance_balance >= src.constants.TRADE_SIZE:
@@ -48,6 +54,8 @@ def simulate_trading(prices: np.ndarray, with_loan: bool = False) -> Tuple[List[
                     trade_count += 1
                     binance_balance -= trade_size
                     coinbase_balance += trade_size + profit
+                    coinbase_volume += trade_size
+                    binance_volume += trade_size
             
             # Balance transfer logic (unchanged)
             total_balance = binance_balance + coinbase_balance
@@ -72,5 +80,7 @@ def simulate_trading(prices: np.ndarray, with_loan: bool = False) -> Tuple[List[
                 hourly_profit -= hourly_loan_cost
             
             hourly_profits.append(hourly_profit)
+            binance_volumes.append(binance_volume)
+            coinbase_volumes.append(coinbase_volume)
     
-    return hourly_profits, trade_count, loan_cost
+    return hourly_profits, trade_count, loan_cost, binance_volumes, coinbase_volumes

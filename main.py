@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 from src.price_simulation import simulate_price
 from src.trading_simulation import simulate_trading
+from src.trade_metrics import calculate_trade_metrics
 from src.calculate_volume import calculate_daily_volume
 from src.optimal_balance import calculate_optimal_balances
 from src.balance_threshold import calculate_balance_threshold
@@ -25,6 +26,10 @@ hourly_profits_with_loan, trade_count_with_loan, loan_cost = simulate_trading(pr
 total_profit_without_loan = sum(hourly_profits_without_loan)
 total_profit_with_loan = sum(hourly_profits_with_loan)
 
+# Calculate metrics
+metrics_without_loan = calculate_trade_metrics(hourly_profits_without_loan, trade_count_without_loan)
+metrics_with_loan = calculate_trade_metrics(hourly_profits_with_loan, trade_count_with_loan)
+
 # Calculate and print results
 daily_volume_binance, daily_volume_coinbase = calculate_daily_volume()
 optimal_balances = calculate_optimal_balances(ASSETS_UNDER_MANAGEMENT)
@@ -39,14 +44,16 @@ print(f"3. Max balance for each asset/exchange: {BALANCE_THRESHOLD:.2%} of total
 print(f"4. Transfer between exchanges when balance exceeds {BALANCE_THRESHOLD:.2%} of total assets on one exchange")
 print(f"5. Expected trades per day: {trade_count_without_loan // DAYS}")
 print(f"6. Loan analysis:")
-print(f"   Profit without loan: ${total_profit_without_loan:,.2f}")
-print(f"   Profit with loan: ${total_profit_with_loan:,.2f}")
+print(f"   Profit without loan: ${metrics_without_loan[0]:,.2f}")
+print(f"   Profit with loan: ${metrics_with_loan[0]:,.2f}")
 print(f"   Loan cost: ${loan_cost:,.2f}")
-if total_profit_with_loan > total_profit_without_loan:
-    print(f"   Recommendation: Take the loan. Additional profit: ${total_profit_with_loan - total_profit_without_loan:,.2f}")
+print(f"   Win rate without loan: {metrics_without_loan[3]:.2%}")
+print(f"   Win rate with loan: {metrics_with_loan[3]:.2%}")
+if metrics_with_loan[0] > metrics_without_loan[0]:
+    print(f"   Recommendation: Take the loan. Additional profit: ${metrics_with_loan[0] - metrics_without_loan[0]:,.2f}")
 else:
-    print(f"   Recommendation: Do not take the loan. Potential loss: ${total_profit_without_loan - total_profit_with_loan:,.2f}")
-print(f"7. Expected total profit per day (without loan): ${total_profit_without_loan / DAYS:,.2f}")
+    print(f"   Recommendation: Do not take the loan. Potential loss: ${metrics_without_loan[0] - metrics_with_loan[0]:,.2f}")
+print(f"7. Expected total profit per day (without loan): ${metrics_without_loan[0] / DAYS:,.2f}")
 print("8. Risk measures: Implement position limits, stop-loss orders, and diversification")
 print("9. Key metrics: Daily profit, trade count, asset distribution, price volatility, loan utilization")
 print("10. Stop loss: 10% below entry, Take profit: 20% above entry")

@@ -31,11 +31,10 @@ def simulate_trading(prices: np.ndarray, with_loan: bool = False) -> Tuple[List[
                     profit = (sell_price - buy_price) * trade_size
                     profit -= trade_size * (src.constants.COINBASE_FEE + src.constants.BINANCE_FEE)
                     
-                    if profit > 0:
-                        hourly_profit += profit
-                        trade_count += 1
-                        coinbase_balance -= trade_size
-                        binance_balance += trade_size + profit
+                    hourly_profit += profit
+                    trade_count += 1
+                    coinbase_balance -= trade_size
+                    binance_balance += trade_size + profit
             else:
                 # Buy on Binance, sell on Coinbase
                 if binance_balance >= src.constants.TRADE_SIZE:
@@ -45,13 +44,12 @@ def simulate_trading(prices: np.ndarray, with_loan: bool = False) -> Tuple[List[
                     profit = (sell_price - buy_price) * trade_size
                     profit -= trade_size * (src.constants.COINBASE_FEE + src.constants.BINANCE_FEE)
                     
-                    if profit > 0:
-                        hourly_profit += profit
-                        trade_count += 1
-                        binance_balance -= trade_size
-                        coinbase_balance += trade_size + profit
+                    hourly_profit += profit
+                    trade_count += 1
+                    binance_balance -= trade_size
+                    coinbase_balance += trade_size + profit
             
-            # Balance transfer logic
+            # Balance transfer logic (unchanged)
             total_balance = binance_balance + coinbase_balance
             if binance_balance > total_balance * BALANCE_THRESHOLD:
                 transfer_amount = binance_balance - (total_balance * TRANSFER_THRESHOLD)

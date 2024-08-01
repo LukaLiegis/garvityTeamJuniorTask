@@ -16,7 +16,17 @@ The trading system consists of several componenets:
 
 ## Task Questions / Simulation Results
 
-1. 
+1. Expected daily trading volume:
+2. Optimal balance:
+3. Max balance for each exchange
+4. Transfer point between exchanges:
+5. Expected trades per day
+6. Loan decision: 
+7. Expected total profit for the day:
+8. Risk measures:
+9. Key metrics: See next section
+10. Stop loss / take profit:
+11. System improvement: See next section
 
 ## Key Metrics to Monitor
 

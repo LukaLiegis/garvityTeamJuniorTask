@@ -14,9 +14,9 @@ The trading system consists of several componenets:
 4. Risk Management: Implements various risk measures to protect against losses.
 5. Performance Metrics: Calculates and monitors key performance indicators.
 
-## Simulation Results
+## Task Questions / Simulation Results
 
-## Task Questions
+1. 
 
 ## Key Metrics to Monitor
 

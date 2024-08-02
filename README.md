@@ -16,17 +16,23 @@ The trading system consists of several componenets:
 
 ## Task Questions / Simulation Results
 
-1. Expected daily trading volume:
+1. Expected daily trading volume: $24,000
 2. Optimal balance:
-3. Max balance for each exchange
-4. Transfer point between exchanges:
-5. Expected trades per day
-6. Loan decision: 
-7. Expected total profit for the day:
-8. Risk measures:
+    - DOUBLEDOGE_coinbase: $1,857,471.66
+    - DOUBLEDOGE_binance: $2,321,839.57
+    - USD: $820,688.77
+    - USDT: $820,688.77
+3. Max balance for each exchange: maximum of 60% of assets per exchange
+4. Transfer point between exchanges: Transfer between exchanges when balance exceeds 60.00% of total assets on one exchange
+5. Expected trades per day: 24
+6. Loan decision: not profitable to take the loan
+7. Expected total profit for the day: $155,510.84
+8. Risk measures: Implement position limits, stop-loss orders, and diversification
 9. Key metrics: See next section
-10. Stop loss / take profit:
+10. Stop loss / take profit: 10% below entry, Take profit: 20% above entry
 11. System improvement: See next section
+
+![alt text](Figure_1.png)
 
 ## Key Metrics to Monitor
 

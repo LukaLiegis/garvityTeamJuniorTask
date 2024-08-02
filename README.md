@@ -37,10 +37,10 @@ The trading system consists of several componenets:
 ## Key Metrics to Monitor
 
 - Daily profit
-- trade count
-- asset distribution
-- price volatility
-- loan utilization
+- Trade count
+- Asset distribution
+- Price volatility
+- Loan utilization
 - Sharpe ratio
 
 ## Ways to improve the system
